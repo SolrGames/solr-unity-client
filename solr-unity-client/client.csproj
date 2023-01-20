@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Solana.Unity.Programs" Version="2.6.0.9" />
+    <PackageReference Include="Solana.Unity.Rpc" Version="2.6.0.9" />
+    <PackageReference Include="Solana.Unity.Wallet" Version="2.6.0.9" />
+  </ItemGroup>
+
+</Project>
