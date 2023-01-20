@@ -419,7 +419,10 @@ namespace Scorekeeper
 
             public PublicKey VerifierAccount { get; set; }
 
-            public PublicKey SystemProgram { get; set; }
+            public PublicKey SystemProgram
+            {
+                get { return Solana.Unity.Programs.SystemProgram.ProgramIdKey; }
+            }
         }
 
         public class FinalizeGameSeasonAccounts
@@ -441,7 +444,10 @@ namespace Scorekeeper
 
             public PublicKey GameSeason { get; set; }
 
-            public PublicKey SystemProgram { get; set; }
+            public PublicKey SystemProgram
+            {
+                get { return Solana.Unity.Programs.SystemProgram.ProgramIdKey; }
+            }
         }
 
         public class IncrementPlayerScoreAccounts
@@ -454,7 +460,10 @@ namespace Scorekeeper
 
             public PublicKey GameSeason { get; set; }
 
-            public PublicKey SystemProgram { get; set; }
+            public PublicKey SystemProgram
+            {
+                get { return Solana.Unity.Programs.SystemProgram.ProgramIdKey; }
+            }
         }
 
         public static class ScorekeeperProgram
