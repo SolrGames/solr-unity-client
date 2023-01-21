@@ -36,10 +36,10 @@ UnityEngine.Debug.Log("Creating game season account...");
 var createdGameSeason = await example.InitNewGameSeason();
 UnityEngine.Debug.Log($"GameSeason  Result: {createdGameSeason.PlayerCount}");
 
-// this is a public key for your game. The one here is a test key that I used.
+// This is a public key for your game. The one here is a test PublicKey based on the keypair used
+// in the Example code
 var verifierAccountAddress = Scorekeeper.Accounts.VerifierAccount.FindProgramAddress(new PublicKey("CboGra4fhDm14GbcdkfLpzC9uaVcwpMFykJ1vzNXwwVB"));
 UnityEngine.Debug.Log($"Using verifier: {verifierAccountAddress.Key}");
-
 
 var gameSeasonAccount = Scorekeeper.Accounts.GameSeason.FindProgramAddress(verifierAccountAddress, seasonId);
 var gameSeason = await client.GetGameSeasonAsync(gameSeasonAccount);
