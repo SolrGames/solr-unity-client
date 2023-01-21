@@ -26,62 +26,6 @@ namespace Scorekeeper
         /// <summary>
         /// Data holder type for a program-derived address with bump. 
         /// </summary>
-        public class ProgramDerivedAddress
-        {
-            /// <summary>
-            /// Gets the public key. 
-            /// </summary>
-            public PublicKey PublicKey { get; private set; }
-
-            /// <summary>
-            /// Gets the byte bump offset.
-            /// </summary>
-            public byte Bump { get; private set; }
-
-            public ProgramDerivedAddress(PublicKey publicKey, byte bump = 255)
-            {
-                this.PublicKey = publicKey;
-                this.Bump = bump;
-            }
-
-            public static implicit operator PublicKey(ProgramDerivedAddress pda) => (pda != null) ? pda.PublicKey : null;
-
-            public static ProgramDerivedAddress FindProgramAddress(IEnumerable<byte[]> seeds, PublicKey programId)
-            {
-                byte nonce = 255;
-
-                while (nonce != 0)
-                {
-                    UnityEngine.Debug.Log($"Nonce: {nonce}");
-                    PublicKey address = null;
-                    List<byte[]> seedsWithNonce = new List<byte[]>(seeds);
-                    seedsWithNonce.Add(new byte[] { nonce });
-
-                    //try to generate the address 
-                    bool created = false;
-                    try
-                    {
-                        created = PublicKey.TryCreateProgramAddress(new List<byte[]>(seedsWithNonce), programId, out address);
-                    }
-                    catch (Exception e)
-                    {
-                        UnityEngine.Debug.Log($"Exception: {e}");
-                    }
-
-                    //if succeeded, return 
-                    if (created)
-                    {
-                        UnityEngine.Debug.Log($"Created pda address: {created}");
-                        return new ProgramDerivedAddress(address, nonce);
-                    }
-
-                    //decrease the nonce and retry if failed 
-                    nonce--;
-                }
-
-                return null;
-            }
-        }
     }
 
     namespace Accounts
@@ -101,14 +45,15 @@ namespace Scorekeeper
 
             public bool IsInitialized { get; set; }
 
-            public static Scorekeeper.Utilities.ProgramDerivedAddress FindProgramAddress(PublicKey verifier, ushort seasonNumber)
+            public static PublicKey FindProgramAddress(PublicKey verifier, ushort seasonNumber)
             {
-                return Scorekeeper.Utilities.ProgramDerivedAddress.FindProgramAddress(new[]
+                bool success = PublicKey.TryFindProgramAddress(new[]
                 {
                     BitConverter.GetBytes(seasonNumber),
                     verifier.KeyBytes,
                 },
-                ScorekeeperClient.ProgramId);
+                ScorekeeperClient.ProgramId, out PublicKey programDerivedAddress, out byte _bump);
+                return success ? programDerivedAddress : null;
             }
 
             public static GameSeason Deserialize(ReadOnlySpan<byte> _data)
@@ -147,14 +92,15 @@ namespace Scorekeeper
 
             public bool IsInitialized { get; set; }
 
-            public static Scorekeeper.Utilities.ProgramDerivedAddress FindProgramAddress(PublicKey verifier)
+            public static PublicKey FindProgramAddress(PublicKey verifier)
             {
-                return Scorekeeper.Utilities.ProgramDerivedAddress.FindProgramAddress(new[]
+                bool success = PublicKey.TryFindProgramAddress(new[]
                 {
                     Encoding.UTF8.GetBytes("verifier"),
                     verifier.KeyBytes,
                 },
-                ScorekeeperClient.ProgramId);
+                ScorekeeperClient.ProgramId, out PublicKey programDerivedAddress, out byte _bump);
+                return success ? programDerivedAddress : null;
             }
 
             public static VerifierAccount Deserialize(ReadOnlySpan<byte> _data)
@@ -195,7 +141,7 @@ namespace Scorekeeper
 
             public bool IsInitialized { get; set; }
 
-            public static Scorekeeper.Utilities.ProgramDerivedAddress FindProgramAddress(PublicKey verifier, ushort seasonNumber, string playerId)
+            public static PublicKey FindProgramAddress(PublicKey verifier, ushort seasonNumber, string playerId)
             {
                 using (SHA256 sha256Hash = SHA256.Create())
                 {
@@ -205,11 +151,12 @@ namespace Scorekeeper
                     builder.Append(verifier.Key);
                     byte[] seeds = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
 
-                    return Scorekeeper.Utilities.ProgramDerivedAddress.FindProgramAddress(new[]
+                    bool success = PublicKey.TryFindProgramAddress(new[]
                         {
                             seeds
                         },
-                        ScorekeeperClient.ProgramId);
+                        ScorekeeperClient.ProgramId, out PublicKey programDerivedAddress, out byte _bump);
+                    return success ? programDerivedAddress : null;
                 }
             }
 
