@@ -19,6 +19,7 @@ namespace Scorekeeper
     {
         public class Example 
         {
+            // Compromised testing keypair. Do not use in your own code.
             private const string MnemonicWords = "that barrel write fix differ room bag shrimp base suffer space behave";
             private static readonly IRpcClient rpcClient = ClientFactory.GetClient(Cluster.DevNet);
             private static readonly IStreamingRpcClient streamingRpcClient = ClientFactory.GetStreamingClient(Cluster.DevNet);
@@ -89,7 +90,7 @@ namespace Scorekeeper
             //
             // Note this example will create a new season each time it is called. You should keep track of your season count
             // and only call this when you want to start a new season.
-            public async Task<Accounts.GameSeason> InitGameSeason()
+            public async Task<Accounts.GameSeason> InitNewGameSeason()
             {
                 Account verifierWalletAccount = GameWallet.GetAccount(0);
                 UnityEngine.Debug.Log($"Game wallet pubkey: {verifierWalletAccount.PublicKey}");
@@ -158,7 +159,7 @@ namespace Scorekeeper
                 return result.WasSuccessful ? result.ParsedResult : null;
             }
 
-            public async Task<Accounts.Player> UpdatePlayerScore(ushort seasonNumber, string playerId, ulong score)
+            public async Task<Accounts.Player> IncrementPlayerScore(ushort seasonNumber, string playerId, ulong increment)
             {
                 Account verifierWalletAccount = GameWallet.GetAccount(0);
                 UnityEngine.Debug.Log($"Game wallet pubkey: {verifierWalletAccount.PublicKey}");
@@ -172,7 +173,7 @@ namespace Scorekeeper
                 IncrementPlayerScoreAccounts accounts = new IncrementPlayerScoreAccounts();
                 accounts.Verifier = verifierWalletAccount;
                 accounts.VerifierAccount = Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
-                accounts.Player = Accounts.Player.FindProgramAddress(verifierWalletAccount.PublicKey, Convert.ToUInt16(0), playerId);
+                accounts.Player = Accounts.Player.FindProgramAddress(verifierWalletAccount.PublicKey, seasonNumber, playerId);
                 accounts.GameSeason = Accounts.GameSeason.FindProgramAddress(accounts.Verifier, seasonNumber);
                 UnityEngine.Debug.Log("Instruction accounts created");
 
@@ -181,7 +182,7 @@ namespace Scorekeeper
                 byte[] tx = new TransactionBuilder()
                     .SetRecentBlockHash(blockhashResult.Result.Value.Blockhash)
                     .SetFeePayer(verifierWalletAccount.PublicKey)
-                    .AddInstruction(ScorekeeperProgram.IncrementPlayerScore(accounts, seasonNumber, playerId, score))
+                    .AddInstruction(ScorekeeperProgram.IncrementPlayerScore(accounts, seasonNumber, playerId, increment))
                     .Build(verifierWalletAccount);
                 UnityEngine.Debug.Log("Transaction built");
                 await SimulateAndSendTransaction(tx);
