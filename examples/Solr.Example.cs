@@ -194,5 +194,41 @@ namespace Example
             return result.WasSuccessful ? result.ParsedResult : null;
         }
 
+        public async Task<Accounts.Player> UpdatePlayerScore(ushort seasonNumber, string playerId, ulong score)
+        {
+            Account verifierWalletAccount = GameWallet.GetAccount(0);
+            UnityEngine.Debug.Log($"Game wallet pubkey: {verifierWalletAccount.PublicKey}");
+
+            PublicKey verifierAccountKey = Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
+            Accounts.VerifierAccount verifierData = (await client.GetVerifierAccountAsync(verifierAccountKey)).ParsedResult;
+
+            // Note that player IDs are a string. They should be unique for each player in your game. For example a UUID
+            // or Base58 encoded public key. This is used to generate the player account address.
+
+            UpdatePlayerScoreAccounts accounts = new UpdatePlayerScoreAccounts();
+            accounts.Verifier = verifierWalletAccount;
+            accounts.VerifierAccount = Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
+            accounts.Player = Accounts.Player.FindProgramAddress(verifierWalletAccount.PublicKey, seasonNumber, playerId);
+            accounts.GameSeason = Accounts.GameSeason.FindProgramAddress(accounts.Verifier, seasonNumber);
+            UnityEngine.Debug.Log("Instruction accounts created");
+
+            // build transaction to send
+            RequestResult<ResponseValue<BlockHash>> blockhashResult = await rpcClient.GetRecentBlockHashAsync();
+            byte[] tx = new TransactionBuilder()
+                .SetRecentBlockHash(blockhashResult.Result.Value.Blockhash)
+                .SetFeePayer(verifierWalletAccount.PublicKey)
+                .AddInstruction(ScorekeeperProgram.UpdatePlayerScore(accounts, seasonNumber, playerId, score))
+                .Build(verifierWalletAccount);
+            UnityEngine.Debug.Log("Transaction built");
+            await SimulateAndSendTransaction(tx);
+            UnityEngine.Debug.Log("Transaction sent and confirmed");
+
+            UnityEngine.Debug.Log($"Player account key {accounts.Player}");
+            var result = await client.GetPlayerAsync(accounts.Player);
+            UnityEngine.Debug.Log($"GameSeasonAccount result {result.WasSuccessful}");
+            UnityEngine.Debug.Log($"GameSeasonAccount init status result {result.ParsedResult.IsInitialized}");
+            return result.WasSuccessful ? result.ParsedResult : null;
+        }
+
     }
 }
