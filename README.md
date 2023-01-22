@@ -1,4 +1,16 @@
 # solr-unity-client
+Hi there! This is a Unity Client for the Solr Scorekeeper Solana program. The program is currently deployed on devnet only. The base client was generated using the [Garbles Client Generator](https://github.com/garbles-labs/Solana.Unity.Anchor).
+
+
+This SDK should be considered pre-release and will very likely change in the future. That said, you can use it now! Let us know what you think in any of these places:
+
+
+[Twitter](https://twitter.com/solr_games)
+
+[Discord](https://discord.gg/NwfUPA4d)
+
+[Github Issues](https://github.com/SolrGames/solr-unity-client/issues)
+
 
 ## Basic Usage
 
@@ -11,7 +23,7 @@ To submit scores, you must register a player for a GameSeason. This is only done
 
 After a player is registered, you can submit scores using your Verifier. 
 
-## Example Usage with Scorekeeper
+### Example Usage with Scorekeeper
 For example usage of the Scorekeeper client, see Solr.Example.cs
 
 An example flow using the functions from Solr.Example.cs
