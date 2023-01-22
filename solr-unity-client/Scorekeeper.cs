@@ -338,9 +338,9 @@ namespace Scorekeeper
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
-        public async Task<RequestResult<string>> SendUpdatePlayerScoreAsync(UpdatePlayerScoreAccounts accounts, ushort seasonCount, string playerId, ulong score, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback, PublicKey programId)
+        public async Task<RequestResult<string>> SendUpdatePlayerScoreAsync(UpdatePlayerScoreAccounts accounts, ushort seasonCount, string playerId, ulong score, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback)
         {
-            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.ScorekeeperProgram.UpdatePlayerScore(accounts, seasonCount, playerId, score, programId);
+            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.ScorekeeperProgram.UpdatePlayerScore(accounts, seasonCount, playerId, score);
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
@@ -494,7 +494,7 @@ namespace Scorekeeper
                 return new Solana.Unity.Rpc.Models.TransactionInstruction { Keys = keys, ProgramId = ScorekeeperClient.ProgramId.KeyBytes, Data = resultData };
             }
 
-            public static Solana.Unity.Rpc.Models.TransactionInstruction UpdatePlayerScore(UpdatePlayerScoreAccounts accounts, ushort seasonCount, string playerId, ulong score, PublicKey programId)
+            public static Solana.Unity.Rpc.Models.TransactionInstruction UpdatePlayerScore(UpdatePlayerScoreAccounts accounts, ushort seasonCount, string playerId, ulong score)
             {
                 List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
                 {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Verifier, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.VerifierAccount, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Player, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.GameSeason, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
@@ -509,7 +509,7 @@ namespace Scorekeeper
                 offset += 8;
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);
-                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = programId.KeyBytes, Data = resultData};
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = ScorekeeperClient.ProgramId.KeyBytes, Data = resultData};
             }
 
             public static Solana.Unity.Rpc.Models.TransactionInstruction IncrementPlayerScore(IncrementPlayerScoreAccounts accounts, ushort seasonCount, string playerId, ulong increment)
