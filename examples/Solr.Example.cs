@@ -57,13 +57,13 @@ namespace Example
         }
 
         // This initializes a verifier account. You only need to do this once.
-        public async Task<Accounts.VerifierAccount> InitVerifierAccount()
+        public async Task<Scorekeeper.Accounts.VerifierAccount> InitVerifierAccount()
         {
             Account verifierWalletAccount = GameWallet.GetAccount(0);
             UnityEngine.Debug.Log($"Game wallet pubkey: {verifierWalletAccount.PublicKey}");
 
             InitVerifierAccountAccounts accounts = new InitVerifierAccountAccounts();
-            accounts.Verifier = Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
+            accounts.Verifier = Scorekeeper.Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
             accounts.VerifierPubKey = verifierWalletAccount.PublicKey;
             UnityEngine.Debug.Log("Instruction accounts created");
 
@@ -89,18 +89,18 @@ namespace Example
         //
         // Note this example will create a new season each time it is called. You should keep track of your season count
         // and only call this when you want to start a new season.
-        public async Task<Accounts.GameSeason> InitNewGameSeason()
+        public async Task<Scorekeeper.Accounts.GameSeason> InitNewGameSeason()
         {
             Account verifierWalletAccount = GameWallet.GetAccount(0);
             UnityEngine.Debug.Log($"Game wallet pubkey: {verifierWalletAccount.PublicKey}");
 
-            PublicKey verifierAccountKey = Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
-            Accounts.VerifierAccount verifierData = (await client.GetVerifierAccountAsync(verifierAccountKey)).ParsedResult;
+            PublicKey verifierAccountKey = Scorekeeper.Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
+            Scorekeeper.Accounts.VerifierAccount verifierData = (await client.GetVerifierAccountAsync(verifierAccountKey)).ParsedResult;
 
             InitGameSeasonAccounts accounts = new InitGameSeasonAccounts();
             accounts.Verifier = verifierWalletAccount;
-            accounts.VerifierAccount = Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
-            accounts.GameSeason = Accounts.GameSeason.FindProgramAddress(accounts.Verifier, Convert.ToUInt16(verifierData.SeasonCount));
+            accounts.VerifierAccount = Scorekeeper.Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
+            accounts.GameSeason = Scorekeeper.Accounts.GameSeason.FindProgramAddress(accounts.Verifier, Convert.ToUInt16(verifierData.SeasonCount));
             UnityEngine.Debug.Log("Instruction accounts created");
 
             // build transaction to send
@@ -121,13 +121,13 @@ namespace Example
             return result.WasSuccessful ? result.ParsedResult : null;
         }
 
-        public async Task<Accounts.Player> RegisterPlayerForSeason(ushort seasonNumber, string playerId)
+        public async Task<Scorekeeper.Accounts.Player> RegisterPlayerForSeason(ushort seasonNumber, string playerId)
         {
             Account verifierWalletAccount = GameWallet.GetAccount(0);
             UnityEngine.Debug.Log($"Game wallet pubkey: {verifierWalletAccount.PublicKey}");
 
-            PublicKey verifierAccountKey = Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
-            Accounts.VerifierAccount verifierData = (await client.GetVerifierAccountAsync(verifierAccountKey)).ParsedResult;
+            PublicKey verifierAccountKey = Scorekeeper.Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
+            Scorekeeper.Accounts.VerifierAccount verifierData = (await client.GetVerifierAccountAsync(verifierAccountKey)).ParsedResult;
 
             // Note that player IDs are a string. They should be unique for each player in your game. For example a UUID
             // or Base58 encoded public key. This is used to generate the player account address.
@@ -135,9 +135,9 @@ namespace Example
 
             InitPlayerAccountForSeasonAccounts accounts = new InitPlayerAccountForSeasonAccounts();
             accounts.Verifier = verifierWalletAccount;
-            accounts.VerifierAccount = Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
-            accounts.Player = Accounts.Player.FindProgramAddress(verifierWalletAccount.PublicKey, Convert.ToUInt16(0), playerId);
-            accounts.GameSeason = Accounts.GameSeason.FindProgramAddress(accounts.Verifier, seasonNumber);
+            accounts.VerifierAccount = Scorekeeper.Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
+            accounts.Player = Scorekeeper.Accounts.Player.FindProgramAddress(verifierWalletAccount.PublicKey, seasonNumber, playerId);
+            accounts.GameSeason = Scorekeeper.Accounts.GameSeason.FindProgramAddress(accounts.Verifier, seasonNumber);
             UnityEngine.Debug.Log("Instruction accounts created");
 
             // build transaction to send
@@ -158,22 +158,22 @@ namespace Example
             return result.WasSuccessful ? result.ParsedResult : null;
         }
 
-        public async Task<Accounts.Player> IncrementPlayerScore(ushort seasonNumber, string playerId, ulong increment)
+        public async Task<Scorekeeper.Accounts.Player> IncrementPlayerScore(ushort seasonNumber, string playerId, ulong increment)
         {
             Account verifierWalletAccount = GameWallet.GetAccount(0);
             UnityEngine.Debug.Log($"Game wallet pubkey: {verifierWalletAccount.PublicKey}");
 
-            PublicKey verifierAccountKey = Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
-            Accounts.VerifierAccount verifierData = (await client.GetVerifierAccountAsync(verifierAccountKey)).ParsedResult;
+            PublicKey verifierAccountKey = Scorekeeper.Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
+            Scorekeeper.Accounts.VerifierAccount verifierData = (await client.GetVerifierAccountAsync(verifierAccountKey)).ParsedResult;
 
             // Note that player IDs are a string. They should be unique for each player in your game. For example a UUID
             // or Base58 encoded public key. This is used to generate the player account address.
 
             IncrementPlayerScoreAccounts accounts = new IncrementPlayerScoreAccounts();
             accounts.Verifier = verifierWalletAccount;
-            accounts.VerifierAccount = Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
-            accounts.Player = Accounts.Player.FindProgramAddress(verifierWalletAccount.PublicKey, seasonNumber, playerId);
-            accounts.GameSeason = Accounts.GameSeason.FindProgramAddress(accounts.Verifier, seasonNumber);
+            accounts.VerifierAccount = Scorekeeper.Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
+            accounts.Player = Scorekeeper.Accounts.Player.FindProgramAddress(verifierWalletAccount.PublicKey, seasonNumber, playerId);
+            accounts.GameSeason = Scorekeeper.Accounts.GameSeason.FindProgramAddress(accounts.Verifier, seasonNumber);
             UnityEngine.Debug.Log("Instruction accounts created");
 
             // build transaction to send
@@ -182,6 +182,42 @@ namespace Example
                 .SetRecentBlockHash(blockhashResult.Result.Value.Blockhash)
                 .SetFeePayer(verifierWalletAccount.PublicKey)
                 .AddInstruction(ScorekeeperProgram.IncrementPlayerScore(accounts, seasonNumber, playerId, increment))
+                .Build(verifierWalletAccount);
+            UnityEngine.Debug.Log("Transaction built");
+            await SimulateAndSendTransaction(tx);
+            UnityEngine.Debug.Log("Transaction sent and confirmed");
+
+            UnityEngine.Debug.Log($"Player account key {accounts.Player}");
+            var result = await client.GetPlayerAsync(accounts.Player);
+            UnityEngine.Debug.Log($"GameSeasonAccount result {result.WasSuccessful}");
+            UnityEngine.Debug.Log($"GameSeasonAccount init status result {result.ParsedResult.IsInitialized}");
+            return result.WasSuccessful ? result.ParsedResult : null;
+        }
+
+        public async Task<Scorekeeper.Accounts.Player> UpdatePlayerScore(ushort seasonNumber, string playerId, ulong score)
+        {
+            Account verifierWalletAccount = GameWallet.GetAccount(0);
+            UnityEngine.Debug.Log($"Game wallet pubkey: {verifierWalletAccount.PublicKey}");
+
+            PublicKey verifierAccountKey = Scorekeeper.Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
+            Scorekeeper.Accounts.VerifierAccount verifierData = (await client.GetVerifierAccountAsync(verifierAccountKey)).ParsedResult;
+
+            // Note that player IDs are a string. They should be unique for each player in your game. For example a UUID
+            // or Base58 encoded public key. This is used to generate the player account address.
+
+            UpdatePlayerScoreAccounts accounts = new UpdatePlayerScoreAccounts();
+            accounts.Verifier = verifierWalletAccount;
+            accounts.VerifierAccount = Scorekeeper.Accounts.VerifierAccount.FindProgramAddress(verifierWalletAccount.PublicKey);
+            accounts.Player = Scorekeeper.Accounts.Player.FindProgramAddress(verifierWalletAccount.PublicKey, seasonNumber, playerId);
+            accounts.GameSeason = Scorekeeper.Accounts.GameSeason.FindProgramAddress(accounts.Verifier, seasonNumber);
+            UnityEngine.Debug.Log("Instruction accounts created");
+
+            // build transaction to send
+            RequestResult<ResponseValue<BlockHash>> blockhashResult = await rpcClient.GetRecentBlockHashAsync();
+            byte[] tx = new TransactionBuilder()
+                .SetRecentBlockHash(blockhashResult.Result.Value.Blockhash)
+                .SetFeePayer(verifierWalletAccount.PublicKey)
+                .AddInstruction(ScorekeeperProgram.UpdatePlayerScore(accounts, seasonNumber, playerId, score))
                 .Build(verifierWalletAccount);
             UnityEngine.Debug.Log("Transaction built");
             await SimulateAndSendTransaction(tx);

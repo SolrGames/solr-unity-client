@@ -62,7 +62,13 @@ UnityEngine.Debug.Log("Registering player for season...");
 var player = await example.RegisterPlayerForSeason(Convert.ToUInt16(0), playerId);
 UnityEngine.Debug.Log($"Player Result: {player.PlayerId} : {player.Score}");
 
-UnityEngine.Debug.Log("Updating player score...");
-var playerUpdated = await example.IncrementPlayerScore(Convert.ToUInt16(0), playerId, scoreUpdate);
+// used for accumulating scores
+UnityEngine.Debug.Log("Incremeneting player score...");
+var playerIncremented = await example.IncrementPlayerScore(Convert.ToUInt16(0), playerId, scoreUpdate);
+UnityEngine.Debug.Log($"Player Result: {playerIncremented.PlayerId} : {playerIncremented.Score}");
+
+// used for accumulating scores
+UnityEngine.Debug.Log("Update player score...");
+var playerUpdated = await example.UpdatePlayerScore(Convert.ToUInt16(0), playerId, scoreUpdate);
 UnityEngine.Debug.Log($"Player Result: {playerUpdated.PlayerId} : {playerUpdated.Score}");
 ```

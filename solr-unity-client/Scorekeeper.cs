@@ -128,6 +128,7 @@ namespace Scorekeeper
         {
             public static ulong ACCOUNT_DISCRIMINATOR => 15766710478567431885UL;
             public static ReadOnlySpan<byte> ACCOUNT_DISCRIMINATOR_BYTES => new byte[] { 205, 222, 112, 7, 165, 155, 206, 218 };
+            public static int MAX_PLAYDER_ID_SIZE => 256;
             public static string ACCOUNT_DISCRIMINATOR_B58 => "bSBoKNsSHuj";
             public PublicKey Verifier { get; set; }
 
@@ -338,6 +339,12 @@ namespace Scorekeeper
             return await SignAndSendTransaction(instr, feePayer, signingCallback);
         }
 
+        public async Task<RequestResult<string>> SendUpdatePlayerScoreAsync(UpdatePlayerScoreAccounts accounts, ushort seasonCount, string playerId, ulong score, PublicKey feePayer, Func<byte[], PublicKey, byte[]> signingCallback)
+        {
+            Solana.Unity.Rpc.Models.TransactionInstruction instr = Program.ScorekeeperProgram.UpdatePlayerScore(accounts, seasonCount, playerId, score);
+            return await SignAndSendTransaction(instr, feePayer, signingCallback);
+        }
+
         protected override Dictionary<uint, ProgramError<ScorekeeperErrorKind>> BuildErrorsDictionary()
         {
             return new Dictionary<uint, ProgramError<ScorekeeperErrorKind>> { { 6000U, new ProgramError<ScorekeeperErrorKind>(ScorekeeperErrorKind.GameSeasonAlreadyInitialized, "Game season already initialized") }, { 6001U, new ProgramError<ScorekeeperErrorKind>(ScorekeeperErrorKind.GameSeasonNotInitialized, "Game season not initialized") }, { 6002U, new ProgramError<ScorekeeperErrorKind>(ScorekeeperErrorKind.PlayerAlreadyInitialized, "Player already initialized") }, { 6003U, new ProgramError<ScorekeeperErrorKind>(ScorekeeperErrorKind.PlayerNotInitialized, "Player not initialized") }, { 6004U, new ProgramError<ScorekeeperErrorKind>(ScorekeeperErrorKind.InvalidPlayerId, "Player ID must match player account") }, { 6005U, new ProgramError<ScorekeeperErrorKind>(ScorekeeperErrorKind.ExeedsMaxScore, "Score exceeds max score") }, { 6006U, new ProgramError<ScorekeeperErrorKind>(ScorekeeperErrorKind.GameSeasonEnded, "Game season has ended") }, { 6007U, new ProgramError<ScorekeeperErrorKind>(ScorekeeperErrorKind.VerifierAlreadyInitialized, "Verifier already initialized") }, { 6008U, new ProgramError<ScorekeeperErrorKind>(ScorekeeperErrorKind.InvalidSeasonCount, "Season count value greater than existing season count") }, };
@@ -413,6 +420,22 @@ namespace Scorekeeper
             }
         }
 
+        public class UpdatePlayerScoreAccounts
+        {
+            public PublicKey Verifier { get; set; }
+
+            public PublicKey VerifierAccount { get; set; }
+
+            public PublicKey Player { get; set; }
+
+            public PublicKey GameSeason { get; set; }
+
+            public PublicKey SystemProgram
+            {
+                get { return Solana.Unity.Programs.SystemProgram.ProgramIdKey; }
+            }
+        }
+
         public static class ScorekeeperProgram
         {
             public static Solana.Unity.Rpc.Models.TransactionInstruction InitVerifierAccount(InitVerifierAccountAccounts accounts)
@@ -470,6 +493,24 @@ namespace Scorekeeper
                 byte[] resultData = new byte[offset];
                 Array.Copy(_data, resultData, offset);
                 return new Solana.Unity.Rpc.Models.TransactionInstruction { Keys = keys, ProgramId = ScorekeeperClient.ProgramId.KeyBytes, Data = resultData };
+            }
+
+            public static Solana.Unity.Rpc.Models.TransactionInstruction UpdatePlayerScore(UpdatePlayerScoreAccounts accounts, ushort seasonCount, string playerId, ulong score)
+            {
+                List<Solana.Unity.Rpc.Models.AccountMeta> keys = new()
+                {Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Verifier, true), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.VerifierAccount, false), Solana.Unity.Rpc.Models.AccountMeta.Writable(accounts.Player, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.GameSeason, false), Solana.Unity.Rpc.Models.AccountMeta.ReadOnly(accounts.SystemProgram, false)};
+                byte[] _data = new byte[1200];
+                int offset = 0;
+                _data.WriteU64(12524155621553711165UL, offset);
+                offset += 8;
+                _data.WriteU16(seasonCount, offset);
+                offset += 2;
+                offset += _data.WriteBorshString(playerId, offset);
+                _data.WriteU64(score, offset);
+                offset += 8;
+                byte[] resultData = new byte[offset];
+                Array.Copy(_data, resultData, offset);
+                return new Solana.Unity.Rpc.Models.TransactionInstruction{Keys = keys, ProgramId = ScorekeeperClient.ProgramId.KeyBytes, Data = resultData};
             }
 
             public static Solana.Unity.Rpc.Models.TransactionInstruction IncrementPlayerScore(IncrementPlayerScoreAccounts accounts, ushort seasonCount, string playerId, ulong increment)
