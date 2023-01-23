@@ -128,6 +128,7 @@ namespace Scorekeeper
         {
             public static ulong ACCOUNT_DISCRIMINATOR => 15766710478567431885UL;
             public static ReadOnlySpan<byte> ACCOUNT_DISCRIMINATOR_BYTES => new byte[] { 205, 222, 112, 7, 165, 155, 206, 218 };
+            public static int MAX_PLAYDER_ID_SIZE => 256;
             public static string ACCOUNT_DISCRIMINATOR_B58 => "bSBoKNsSHuj";
             public PublicKey Verifier { get; set; }
 
