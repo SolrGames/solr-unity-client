@@ -1,5 +1,7 @@
 # solr-unity-client
-Hi there! This is a Unity Client for the Solr Scorekeeper Solana program. The program is currently deployed on devnet only. The base client was generated using the [Garbles Client Generator](https://github.com/garbles-labs/Solana.Unity.Anchor).
+Hi there! This is a Unity Client for the Solr Scorekeeper Solana program. If you're looking to learn more about Solr check out our [landing page](https://solr.games)!
+
+The program is currently deployed on devnet only. The base client was generated using the [Garbles Client Generator](https://github.com/garbles-labs/Solana.Unity.Anchor).
 
 
 This SDK should be considered pre-release and will very likely change in the future. That said, you can use it now! Let us know what you think in any of these places:
